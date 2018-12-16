@@ -4,15 +4,19 @@ for each instructions, besides, this module can also receive request from outter
 to change the PC value.
 */
 module ifu(
+	i_Clk,
+	i_RstN,
+	o_FetchV,
+	o_FetchA,
+	i_FetchR,
+	i_JumpV,
+	i_JumpT,
+	o_InstrSel
 	);
 
 	parameter PC_WIDTH = `ANOM_PC_WIDTH;
 
-	/* status declare */ // {
-	// IDLE, the idle state, this status occurred only in reset, when reset is deasserted, then the next cycle it will changed to FETCH
-	// status
 
-	// FETCH
 	/******************/ // }
 
 	/* interface definition */ // {
@@ -53,6 +57,7 @@ module ifu(
 
 	/* internal PC */ // {
 	reg [PC_WIDTH-1:0] r_PC;
+	reg r_FetchV;
 	/*******************************************************************************/ // }
 
 
@@ -60,38 +65,54 @@ module ifu(
 
 	// assign the output instruction sel when fetch valid and the PC value
 	assign o_InstrSel = {2{o_FetchV}} & r_PC[1:0];
-	assign w_status   = r_nstatus;
+	assign o_FetchA   = {(PC_WIDTH-2){o_FetchV}} & r_PC[PC_WIDTH-1:2];
+	assign o_FetchV   = r_FetchV;
 
 	/*******************************************************************************/ // }
 
-	/* FSM */ // {
-	// status and next status
-	reg [] w_status,r_nstatus;
 	/******************************************************************************/ // }
 
 	/* block */
-	always @(posedge i_Clk or negedge i_RstN) begin // {
-		if (~i_RstN) begin // {
-			// async. reset block
-		// }
-		end else begin // {
-			case (w_status) // {
-				IDLE: begin // {
-				end // }
-			endcase // }
-		end // }
-	end // }
+	// TODO always @(posedge i_Clk or negedge i_RstN) begin // {
+	// TODO 	if (~i_RstN) begin // {
+	// TODO 		// async. reset block
+	// TODO 	// }
+	// TODO 	end else begin // {
+	// TODO 		case (w_status) // {
+	// TODO 			IDLE: begin // {
+	// TODO 			end // }
+	// TODO 		endcase // }
+	// TODO 	end // }
+	// TODO end // }
 	/*********************************/
 
 
-	/* FSM block */ // {
+	/* Process block */ // {
 	always @(posedge i_Clk or negedge i_RstN) begin // {
 		if (~i_RstN) begin // {
+			r_PC <= {PC_WIDTH{1'b0}};
+			r_FetchV <= 1'b0;
 		// }
 		end else begin // {
+			if (i_JumpV) begin // {
+				// if jump valid, then this cycle need to change to jump target
+				// and no fetch request are valid.
+				r_PC <= i_JumpT;
+				r_FetchV <= 1'b0;
+			// }
+			end else begin // {
+				// if i_FetchR is high, then choose to add the PC value and send fetch request
+				if (i_FetchR == 1'b1) begin // P
+					r_PC <= r_PC + 3'h4; // else add one for PC
+					r_FetchV <= 1'b1;
+				// }
+				end else r_FetchV <= 1'b0; // else if FetchR is 0, then the request should be pull low.
+			end // }
 		end // }
 	end // }
-	/*************/ // }
+	/*****************/ // }
+
+
 
 
 endmodule
