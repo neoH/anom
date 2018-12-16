@@ -8,6 +8,13 @@ module ifu(
 
 	parameter PC_WIDTH = `ANOM_PC_WIDTH;
 
+	/* status declare */ // {
+	// IDLE, the idle state, this status occurred only in reset, when reset is deasserted, then the next cycle it will changed to FETCH
+	// status
+
+	// FETCH
+	/******************/ // }
+
 	/* interface definition */ // {
 
 	// i_Clk,  the input clock signal, the whole core use only one clock frequency
@@ -53,13 +60,38 @@ module ifu(
 
 	// assign the output instruction sel when fetch valid and the PC value
 	assign o_InstrSel = {2{o_FetchV}} & r_PC[1:0];
+	assign w_status   = r_nstatus;
 
 	/*******************************************************************************/ // }
 
+	/* FSM */ // {
+	// status and next status
+	reg [] w_status,r_nstatus;
+	/******************************************************************************/ // }
+
 	/* block */
 	always @(posedge i_Clk or negedge i_RstN) begin // {
+		if (~i_RstN) begin // {
+			// async. reset block
+		// }
+		end else begin // {
+			case (w_status) // {
+				IDLE: begin // {
+				end // }
+			endcase // }
+		end // }
 	end // }
 	/*********************************/
+
+
+	/* FSM block */ // {
+	always @(posedge i_Clk or negedge i_RstN) begin // {
+		if (~i_RstN) begin // {
+		// }
+		end else begin // {
+		end // }
+	end // }
+	/*************/ // }
 
 
 endmodule
