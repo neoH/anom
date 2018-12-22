@@ -7,4 +7,6 @@
 
 	`define ANOM_PC_WIDTH               32
 
+	`define ANOM_COMMON_REG_WIDTH       4
+
 `endif

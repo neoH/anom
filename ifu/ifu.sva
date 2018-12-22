@@ -2,7 +2,7 @@
 The assertion block for ifu module
 */
 
-module ifu_ast_block(
+module ifu_sva_block(
 	input logic i_Clk,
 );
 
